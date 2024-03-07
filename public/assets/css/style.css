@@ -1,0 +1,31 @@
+.bg-primary {
+  background-color: #64b5f6 !important;
+}
+
+[class*="sidebar-light-"] .nav-sidebar > .nav-item.menu-open > .nav-link,
+[class*="sidebar-light-"] .nav-sidebar > .nav-item:hover > .nav-link {
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid white;
+  color: white !important;
+}
+
+.nav-pills .nav-link {
+  color: #6c757d;
+}
+
+[class*="sidebar-light-"] .sidebar a {
+  color: black;
+}
+
+.content-wrapper {
+  background-color: #cfd8dc;
+}
+
+.card {
+  background-color: #f5f5f5;
+}
+
+.main-footer {
+  background-color: #9ea7aa;
+  color: white;
+}

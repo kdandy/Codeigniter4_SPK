@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Controllers\BaseController;
+use App\Models\MyUserModel;
+use CodeIgniter\API\ResponseTrait;
+use Myth\Auth\Password;
+
+class User extends BaseController {
+    use ResponseTrait;
+
+    var $url = 'user';
+
+    public function __construct() {
+        $this->userModel = new MyUserModel();
+    }
+
+    public function index() {
+
+        $data = [
+            'title' => 'Data User',
+            'url'   => $this->url,
+            'userData' => $this->userModel->findAll(),
+        ];
+
+        return view('/user/index', $data);
+    }
+
+
+    public function tambah() {
+        $data = [
+            'title' => 'Tambah Data User',
+            'url'   => $this->url,
+            'jabatan' =>  $this->userModel->findAllRole()
+        ];
+
+        return view('/user/tambah', $data);
+    }
+
+    public function edit($id) {
+        $data = [
+            'title' => 'Edit Data User',
+            'user'  => $this->userModel->find($id),
+            'url'   => $this->url,
+            'jabatan' =>  $this->userModel->findAllRole()
+        ];
+
+        return $this->respond(view('/user/edit', $data), 200);
+    }
+
+    public function table() {
+        $data = [
+            'title' => 'Data User',
+            'url'   => $this->url,
+            'userData' => $this->userModel->findAll(),
+        ];
+
+        return view('/user/table', $data);
+    }
+
+    public function add() {
+        $rules = [
+            'username'  => [
+                'rules'  => 'required|is_unique[users.username]',
+                'errors' => [
+                    'is_unique' => 'Username telah digunakan.'
+                ]
+            ],
+            'password' => [
+                'rules' => 'required|min_length[8]',
+                'errors' => [
+                    'min_length' => 'Password minimal 8 Digit.'
+                ]
+            ],
+            'password2' => [
+                'rules' => 'required|matches[password]',
+                'errors' => [
+                    'matches' => 'Password tidak sama.'
+                ]
+            ]
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->respond([
+                'status' => 'error',
+                'error' => $this->validation->getErrors()
+            ], 400);
+        }
+
+        $request = $this->request->getPost();
+
+        $data = [
+            'nama_user' => $request['nama_user'],
+            'username' => $request['username'],
+            'password_hash' => Password::hash($request['password']),
+            'active'    => "1"
+        ];
+
+        $this->userModel->withGroup($request['jabatan'])->save($data);
+
+        $res = [
+            'status'    => 'success',
+            'msg'     => 'Berhasil menambah Data.',
+        ];
+
+        return $this->respond($res, 200);
+    }
+
+    public function save($id) {
+        $rules = [
+            'username'  => [
+                'rules'  => 'is_unique[user.username]',
+                'errors' => [
+                    'is_unique' => 'Username telah digunakan.'
+                ]
+            ],
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->respond([
+                'status' => 'error',
+                'error' => $this->validation->getErrors()
+            ], 400);
+        }
+
+
+
+        $data = $this->request->getPost();
+        $this->userModel->updateGroup($id, $this->request->getPost("jabatan"));
+        $this->userModel->update($id, $data);
+
+        $res = [
+            'status'    => 'success',
+            'msg'     => 'Berhasil mengedit Data.',
+        ];
+
+        return $this->respond($res, 200);
+    }
+
+
+    public function delete($id) {
+        $this->userModel->delete($id);
+        $res = [
+            'status'    => 'success',
+            'msg'     => 'Data berhasil dihapus.',
+        ];
+
+        return $this->respond($res, 200);
+    }
+}
